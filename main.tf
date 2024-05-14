@@ -1,10 +1,17 @@
+resource "aws_eip" "eip" {
+}
+
+output "eip_addr" {
+  value = aws_eip.eip.public_ip
+}
+
 resource "aws_security_group" "terra-sg" {
   name = "terra-sg"
 
   ingress {
     from_port   = 80
     to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${data.terraform_remote_state.eip.outputs.eip_addr}/32"]
     protocol    = "tcp"
   }
   egress {
@@ -15,14 +22,14 @@ resource "aws_security_group" "terra-sg" {
   }
 }
 
-resource "aws_instance" "ec2" {
-  ami                    = var.amis["aws"]
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.terra-sg.id]
-  tags = {
-    Name = "aws-ec2-instance"
-  }
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
+# resource "aws_instance" "ec2" {
+#   ami                    = var.amis["aws"]
+#   instance_type          = var.instance_type
+#   vpc_security_group_ids = [aws_security_group.terra-sg.id]
+#   tags = {
+#     Name = "aws-ec2-instance"
+#   }
+#   lifecycle {
+#     ignore_changes = [tags]
+#   }
+# }
